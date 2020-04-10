@@ -1,0 +1,38 @@
+version: '3'
+services:
+  front-envoy:
+    image: envoyproxy/envoy-alpine:v1.7.0
+    volumes:
+      - ./front-envoy/envoy-config.yaml:/etc/envoy-config.yaml
+    ports:
+      - "80:80"
+      - "9087:9087"
+    command: "/usr/local/bin/envoy -c /etc/envoy-config.yaml --v2-config-only -l info --service-cluster 'front-envoy' --service-node 'front-envoy' --log-format '[METADATA][%Y-%m-%d %T.%e][%t][%l][%n] %v'"
+
+  service_a_envoy:
+    image: envoyproxy/envoy-alpine:v1.7.0
+    volumes:
+      - ./ping-pong/envoy-config.yaml:/etc/envoy-config.yaml
+    ports:
+      - "9080:9080"
+      - "9085:9085"
+      - "9091:9091"                       # for B envoy proxy 
+    command: "/usr/local/bin/envoy -c /etc/envoy-config.yaml --v2-config-only -l info --service-cluster 'service-a' --service-node 'service-a' --log-format '[METADATA][%Y-%m-%d %T.%e][%t][%l][%n] %v'"
+
+  service_a:                               # actual container name
+    build: ping-pong/
+    ports:
+    - "8080:8080"
+
+  service_b_envoy:
+    image: envoyproxy/envoy-alpine:v1.7.0
+    volumes:
+      - ./ding-dong/envoy-config.yaml:/etc/envoy-config.yaml
+    ports:
+      - "9090:9090"
+    command: "/usr/local/bin/envoy -c /etc/envoy-config.yaml --v2-config-only -l info --service-cluster 'service-b' --service-node 'service-b' --log-format '[METADATA][%Y-%m-%d %T.%e][%t][%l][%n] %v'"  
+
+  service_b:
+    build: ding-dong/
+    ports:
+    - "8090:8090"
