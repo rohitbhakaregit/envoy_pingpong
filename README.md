@@ -1,7 +1,7 @@
 # envoy_pingpong
 ![Architecture Diagram](Architecture_dig.png)
 
-## How to Run:
+## How to Run
 ```
 git clone https://github.com/rohitbhakaregit/envoy_pingpong.git
 cd envoy_pingpong
